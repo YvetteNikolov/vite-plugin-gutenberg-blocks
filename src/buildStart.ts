@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 
 const normaliseArray = (source: unknown) => (Array.isArray(source) ? source : [source]);
 
-export async function sideload(blockJson: WordpressBlockJson, outputDirectory: string) {
+export async function sideload(blockJson: WordpressBlockJson, outputDirectory: string, entry: string) {
 	// Load the block.json options for "script" (frontend/backend) and "viewScript" (frontend)
 	const viewScript = blockJson?.viewScript ?? [];
 	const standardScript = blockJson?.script ?? [];
@@ -23,9 +23,9 @@ export async function sideload(blockJson: WordpressBlockJson, outputDirectory: s
 		});
 
 	for (const script of concatScripts) {
-		const scriptPath = resolve(`${process.env.PWD}/src/${script}`);
+		const scriptPath = resolve(`${process.env.PWD}/${entry}/${script}`);
 		// Vite won't track this file for watching, so we'll add a manual watcher
-		this.addWatchFile("./src/" + script);
+		this.addWatchFile(`./${entry}/${script}`);
 		let wpImports = [];
 		// Build the script as a sideloaded file that isn't injected into the main bundle
 		const result = await esBuild({
@@ -69,7 +69,7 @@ export async function sideload(blockJson: WordpressBlockJson, outputDirectory: s
 		});
 
 		const bundledDependencies = Object.keys(result.metafile.inputs).filter((dep) => {
-			if (dep === "src/" + script) return false;
+			if (dep === `${entry}/` + script) return false;
 			if (/:/.test(dep)) return false;
 			else return true;
 		});

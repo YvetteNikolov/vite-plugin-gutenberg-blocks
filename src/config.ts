@@ -7,7 +7,7 @@ import { resolve, sep } from "node:path";
  *
  * @see https://vitejs.dev/guide/api-plugin.html#config
  */
-export const config = ({ outDir = null, blockFile = null } = {}) => {
+export const config = ({ outDir = null, blockFile = null, entry = null } = {}) => {
 	const pwd = process.env.PWD;
 	const block = pwd.split(sep).pop();
 
@@ -15,7 +15,7 @@ export const config = ({ outDir = null, blockFile = null } = {}) => {
 		define: { "process.env.NODE_ENV": `"${process.env.NODE_ENV}"` },
 		build: {
 			lib: {
-				entry: resolve(pwd, "src/index.jsx"),
+				entry: resolve(pwd, entry + "/index.jsx"),
 				name: "index",
 				formats: ["iife"],
 				fileName: () => "index.js",
