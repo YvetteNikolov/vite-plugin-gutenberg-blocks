@@ -42,12 +42,11 @@ export async function transform(
 
 	const result = await preprocessCSS(code, id, config);
 
-	const outputPath = trimSlashes(id.replace(`${process.cwd()}${sep}${entry}`, "").replace(/\\/g, "/")).replace(
-		/\.(post|s)?css$/i,
-		".css"
-	);
+	const entryAbs = resolve(process.cwd(), entry);
+	const idNormalized = id.replace(/\\/g, "/");
+	const entryAbsNormalized = entryAbs.replace(/\\/g, "/");
 
-	console.log(outputPath);
+	const outputPath = trimSlashes(idNormalized.replace(entryAbsNormalized, "")).replace(/\.(post|s)?css$/i, ".css");
 
 	const style = blockFile?.style ? wrapArray(blockFile.style) : [];
 	const editorStyle = blockFile?.editorStyle ? wrapArray(blockFile.editorStyle) : [];
