@@ -20,11 +20,12 @@ export const config = ({ outDir = null, blockFile = null, entry = null } = {}) =
 				formats: ["iife"],
 				fileName: () => "index.js",
 			},
-			outDir: outDir ? outDir + block : resolve(pwd, "../../../build/" + block),
+			outDir: outDir ? outDir : resolve(pwd, "../../../build/" + block),
 			rollupOptions: {},
 			target: "es2020",
 			minify: true,
 			cssCodeSplit: true, // This option stops the default `styles.css` from being bundled
+			inlineDynamicImports: true,
 		},
 	};
 };
