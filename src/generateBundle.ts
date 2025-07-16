@@ -1,6 +1,7 @@
 import { generateFileHash, generatePhpAssetFile } from "./utils.js";
 import type { SourceMap } from "node:module";
 import type { OutputOptions, PluginContext } from "rollup";
+import type { ResolvedConfig } from "vite";
 
 export type EmittedAsset = {
 	type: "asset";
@@ -10,7 +11,7 @@ export type EmittedAsset = {
 	source?: string | Uint8Array;
 };
 
-type AssetInfo = {
+export type AssetInfo = {
 	fileName: string;
 	name?: string;
 	needsCodeReference: boolean;
@@ -20,7 +21,7 @@ type AssetInfo = {
 	imports: string[];
 };
 
-type ChunkInfo = {
+export type ChunkInfo = {
 	code: string;
 	dynamicImports: string[];
 	exports: string[];
@@ -62,7 +63,8 @@ type ChunkInfo = {
 export function generateBundle(
 	this: PluginContext,
 	options: OutputOptions,
-	bundle: { [fileName: string]: ChunkInfo | AssetInfo }
+	bundle: { [fileName: string]: ChunkInfo | AssetInfo },
+	dependencies: string[]
 ) {
 	let hash: string = "";
 
@@ -76,6 +78,10 @@ export function generateBundle(
 		}, acc);
 		return acc;
 	}, new Set()) as Set<string>;
+
+	for (const dependency of dependencies) {
+		imports.add(dependency);
+	}
 
 	this.emitFile({
 		type: "asset",

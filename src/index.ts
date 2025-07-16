@@ -1,19 +1,21 @@
-import type { PluginContext, InputOptions } from "rollup";
+import type { PluginContext, InputOptions, OutputOptions } from "rollup";
 import type { ResolvedConfig } from "vite";
 
 import { sep } from "node:path";
 import { readFileSync } from "node:fs";
 import { sideload } from "./buildStart.js";
 import { config } from "./config.js";
-import { generateBundle } from "./generateBundle.js";
+import { generateBundle, type ChunkInfo, type AssetInfo }  from "./generateBundle.js";
 import { options } from "./options.js";
 import { outputOptions } from "./outputOptions.js";
 import generatePlugins from "./plugins.js";
 import { transform, type WordpressBlockJson } from "./transform.js";
 
+
 interface PluginConfig {
 	watch?: string[];
 	outDir?: string;
+	dependencies?: string[];
 }
 
 let _config: ResolvedConfig;
@@ -24,7 +26,7 @@ export const createViteBlock = (pluginConfig = {} as PluginConfig) => {
 	let outputDirectory: string;
 	const blockFile: WordpressBlockJson = JSON.parse(readFileSync(`${pwd}/src/block.json`, "utf-8"));
 
-	const { watch = ["./src/template.php", "./src/render.php"], outDir = null } = pluginConfig;
+	const { watch = ["./src/template.php", "./src/render.php"], outDir = null, dependencies = [] } = pluginConfig;
 
 	const regex = new RegExp(sep + "$");
 	const normalisedOut = regex.test(outDir) === false && outDir ? outDir + sep : outDir;
@@ -49,7 +51,9 @@ export const createViteBlock = (pluginConfig = {} as PluginConfig) => {
 			transform: function (code: string, id: string) {
 				transform.call(this, code, id, blockFile, _config);
 			},
-			generateBundle,
+			generateBundle: function(options: OutputOptions ,bundle: { [fileName: string]: ChunkInfo | AssetInfo }) {
+				generateBundle.call(this, options,bundle, dependencies);
+			},
 		},
 		...generatePlugins({ outDir: normalisedOut }),
 	];
