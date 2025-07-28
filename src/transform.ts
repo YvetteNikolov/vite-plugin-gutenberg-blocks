@@ -34,7 +34,7 @@ export async function transform(
 	id: string,
 	blockFile: WordpressBlockJson,
 	config: ResolvedConfig,
-	entry: string
+	entryDir: string
 ): Promise<string | boolean | void> {
 	const [filename] = id.split("?");
 	const isStylesheet = /\.(post|s)?css$/i.test(filename) === true;
@@ -42,7 +42,7 @@ export async function transform(
 
 	const result = await preprocessCSS(code, id, config);
 
-	const entryAbs = resolve(process.cwd(), entry);
+	const entryAbs = resolve(process.cwd(), entryDir);
 	const idNormalized = id.replace(/\\/g, "/");
 	const entryAbsNormalized = entryAbs.replace(/\\/g, "/");
 

@@ -15,7 +15,7 @@ interface PluginConfig {
 	watch?: string[];
 	outDir?: string;
 	dependencies?: string[];
-	entry?: string;
+	entryDir?: string;
 }
 
 let _config: ResolvedConfig;
@@ -29,12 +29,12 @@ export const createViteBlock = (pluginConfig = {} as PluginConfig) => {
 		watch = ["./src/template.php", "./src/render.php"],
 		outDir = null,
 		dependencies = [],
-		entry = "src",
+		entryDir = "src",
 	} = pluginConfig;
 
-	const blockFile: WordpressBlockJson = JSON.parse(readFileSync(`${pwd}/${entry}/block.json`, "utf-8"));
+	const blockFile: WordpressBlockJson = JSON.parse(readFileSync(`${pwd}/${entryDir}/block.json`, "utf-8"));
 
-	const blockFolderName = entry ? entry.split(sep).pop() : pwd.split(sep).pop();
+	const blockFolderName = entryDir ? entryDir.split(sep).pop() : pwd.split(sep).pop();
 
 	const regex = new RegExp(sep + "$");
 	const normalisedOut = regex.test(outDir) === false && outDir ? outDir + sep : outDir;
@@ -42,7 +42,7 @@ export const createViteBlock = (pluginConfig = {} as PluginConfig) => {
 	return [
 		{
 			name: "vite-plugin-gutenberg-blocks",
-			config: () => config({ outDir: normalisedOut, blockFile, entry, blockFolderName }),
+			config: () => config({ outDir: normalisedOut, blockFile, entryDir, blockFolderName }),
 			configResolved(config: ResolvedConfig) {
 				_config = config;
 				outputDirectory = config.build.outDir;
@@ -53,16 +53,16 @@ export const createViteBlock = (pluginConfig = {} as PluginConfig) => {
 				rootDirectory = options.input[0].substring(0, options.input[0].lastIndexOf("/"));
 				watch.forEach((file) => this.addWatchFile(file));
 
-				await sideload.call(this, blockFile, outputDirectory, entry);
+				await sideload.call(this, blockFile, outputDirectory, entryDir);
 			},
 
 			transform: function (code: string, id: string) {
-				transform.call(this, code, id, blockFile, _config, entry);
+				transform.call(this, code, id, blockFile, _config, entryDir);
 			},
 			generateBundle: function (options: OutputOptions, bundle: { [fileName: string]: ChunkInfo | AssetInfo }) {
 				generateBundle.call(this, options, bundle, dependencies);
 			},
 		},
-		...generatePlugins({ outDir: normalisedOut, entry }),
+		...generatePlugins({ outDir: normalisedOut, entryDir }),
 	];
 };
