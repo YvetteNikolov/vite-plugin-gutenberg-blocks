@@ -34,13 +34,15 @@ export const createViteBlock = (pluginConfig = {} as PluginConfig) => {
 
 	const blockFile: WordpressBlockJson = JSON.parse(readFileSync(`${pwd}/${entry}/block.json`, "utf-8"));
 
+	const blockFolderName = entry ? entry.split(sep).pop() : pwd.split(sep).pop();
+
 	const regex = new RegExp(sep + "$");
 	const normalisedOut = regex.test(outDir) === false && outDir ? outDir + sep : outDir;
 
 	return [
 		{
 			name: "vite-plugin-gutenberg-blocks",
-			config: () => config({ outDir: normalisedOut, blockFile, entry }),
+			config: () => config({ outDir: normalisedOut, blockFile, entry, blockFolderName }),
 			configResolved(config: ResolvedConfig) {
 				_config = config;
 				outputDirectory = config.build.outDir;
